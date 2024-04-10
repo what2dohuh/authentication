@@ -11,7 +11,7 @@ const get = (req, res) => {
 //This is for registering a new user
 
 const Register = async (req, res) => {
-  const { email, name, password, profile } = req.body;
+  const { email, name, password } = req.body;
   try {
     if (!email) {
       return res.status(400).json({ error: "email is required" });
@@ -25,16 +25,16 @@ const Register = async (req, res) => {
         .json({ error: "passwords is required and more than 6 characters " });
     }
     const hashedPass = await hashedPassword(password);
+    const isMatch = await userModel.findOne({email})
+    if (isMatch) {
+      return res
+        .status(400)
+        .json({ error: "email is already registered" });
+    } else {
 
-    if (profile) {
-        const isMatch = await userModel.findOne({email})
-        if (isMatch) {
-          return res
-            .status(400)
-            .json({ error: "email is already registered" });
-        } else {
-
-        cloudinary.uploader.upload(profile, async (err, result) => {
+    if (req.file) {
+      
+        cloudinary.uploader.upload(req.file.path, async (err, result) => {
         if (err) {
           console.log(err);
           return res.status(500).json({
@@ -54,14 +54,15 @@ const Register = async (req, res) => {
           }
         }
       );
-    }} else {
+    } else {
       const user = await userModel.create({
         name,
         email,
         password: hashedPass,
+        profile:""
       });
-      return res.status(200).json(user);
-    }
+      return res.status(200).json({file:req.file,user:user});
+    }}
 
   } catch (error) {
     res.status(500).send(error.message);
