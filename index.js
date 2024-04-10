@@ -12,10 +12,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 
 //This is for mongodb connections
-mongoose.connect(process.env.MONGO_URl, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(app.listen(port, () => {
+mongoose.connect(process.env.MONGO_URl).then(app.listen(port, () => {
     console.log(`listening on port ${port} `)
   })).catch((err)=> console.log(err))
 
